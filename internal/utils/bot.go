@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"balance-bot/internal/config"
 	"fmt"
 )
 
@@ -35,4 +36,33 @@ func SendTelegramMessage(msg, chatId, token string) error {
 	}
 	_, err := GetHTTPClient().SendPostRequest(url, payload, nil, nil)
 	return err
+}
+
+func SendMessage(msg string) error {
+	appConfig, err := config.LoadConfig()
+	if err != nil {
+		return err
+	}
+	if appConfig == nil {
+		return fmt.Errorf("config is nil")
+	}
+	if appConfig.Webhook.TelegramToken != "" && appConfig.Webhook.TelegramChatId != "" {
+		err := SendTelegramMessage(msg, appConfig.Webhook.TelegramChatId, appConfig.Webhook.TelegramToken)
+		if err != nil {
+			return err
+		}
+	}
+	if appConfig.Webhook.Wecom != "" {
+		err := SendWecomMessage(msg, appConfig.Webhook.Wecom)
+		if err != nil {
+			return err
+		}
+	}
+	if appConfig.Webhook.Lark != "" {
+		err := SendLarkMessage(msg, appConfig.Webhook.Lark)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

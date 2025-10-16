@@ -1,0 +1,7 @@
+### 健康检查
+POST http://127.0.0.1:12808/health
+Content-Type: application/json
+
+{
+  "name": "tt1"
+}

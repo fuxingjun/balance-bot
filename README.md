@@ -2,13 +2,25 @@
 
 一个用于周期性检测 EVM 链（当前以 BSC 为主）上地址原生代币余额，并在余额超出配置阈值时通过多种 webhook（企业微信 / 飞书(Lark) / Telegram）发送告警的轻量级守护程序。
 
-## 项目结构（简要）
+### 运行
+下载release文件执行
 
-- `main.go`：程序入口，读取配置并循环检查所有配置的地址余额，触发告警。
-- `internal/config/config.go`：配置结构体及 `config.json` 示例的读写。
-- `internal/core/evm.go`：通过 RPC（`eth_getBalance`）查询原生代币余额，并包含 BSC RPC 列表与轮询逻辑。
-- `internal/utils/*.go`：工具集合，包括 HTTP 客户端、日志封装、消息发送（WeCom / Lark / Telegram）、数值/字符串/hex 工具等。
-- `go.mod`：依赖声明（`fasthttp`、`file-rotatelogs` 等）。
+支持的命令行参数：
+- `-host`: 监听地址 (默认: 127.0.0.1)
+- `-port`: 监听端口 (默认: 12808)
+- `-debug`: 启用调试模式
+
+## 项目结构
+
+```
+balance-bot/
+├── internal/
+│   ├── config/     # 配置管理
+│   ├── core/       # 核心业务逻辑
+│   └── utils/      # 通用工具
+├── main.go         # 程序入口
+└── config.json     # 配置文件
+```
 
 ## 主要功能
 
@@ -41,7 +53,11 @@
       "min": 0.1,
       "max": 1000
     }
-  ]
+  ],
+  "healthCheck": {
+    "interval": 10,
+    "warnCount": 3
+  }
 }
 ```
 
@@ -51,13 +67,15 @@
 - `webhook.lark`：飞书(Lark) 机器人 webhook URL（可选）。
 - `webhook.telegram_token`：Telegram Bot token（可选）。
 - `webhook.telegram_chat_id`：Telegram chat id（可选）。
-- `interval`：检测间隔（秒），默认 30 秒。
+- `interval`：余额检测间隔（秒），默认 30 秒。
 - `tokens`：要监控的地址列表：
   - `address`（必填）：钱包地址。
   - `chainId`（可选）：链 ID（默认 `56`，即 BSC）。
   - `name`（可选）：地址别名，用于通知展示。
   - `min`（可选）：低于该值发送告警（以原生代币为单位，如 BNB/ETH）。默认 `0.1`（见源码默认值）。
   - `max`（可选）：高于该值发送告警（默认不限制）。
+- `healthCheck.interval`：健康检查间隔（秒），默认 10 秒。
+- `healthCheck.warnCount`：未收到健康 ping 后触发告警的次数，默认 3 次。
 
 注意：当前只查询原生链币（如 BNB/ETH）的余额，不包含 ERC20/ERC721 等代币的余额查询。
 
@@ -73,6 +91,10 @@
   "⚠️ Balance for 0x1234**5678(MyWallet01) on chain 56 is below minimum 0.100000: 0.050000"
 
 - 当余额高于 `max`，类似格式。
+
+- 健康检查告警示例：
+
+  ⚠ Health check timeout for taoli-tools, last heartbeat at 2025-10-16T10:31:25+08:00
 
 ## 实现细节（简要）
 

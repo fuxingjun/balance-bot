@@ -3,6 +3,8 @@ package config
 import (
 	"encoding/json"
 	"os"
+	"sync"
+	"time"
 )
 
 type TokenConfig struct {
@@ -20,14 +22,41 @@ type WebhookConfig struct {
 	TelegramChatId string `json:"telegram_chat_id,omitempty"` // 允许为空
 }
 
-type AppConfig struct {
-	Webhook  WebhookConfig `json:"webhook"`
-	Interval int           `json:"interval,omitempty"` // 允许为空, 默认 30s
-	Tokens   []TokenConfig `json:"tokens"`
+type HealthCheckConfig struct {
+	Interval  int `json:"interval,omitempty"`  // 允许为空, 默认 10s
+	WarnCount int `json:"warnCount,omitempty"` // 警告次数 允许为空, 默认 3 次
 }
+
+type AppConfig struct {
+	Webhook     WebhookConfig     `json:"webhook"`
+	Interval    int               `json:"interval,omitempty"` // 允许为空, 默认 30s
+	Tokens      []TokenConfig     `json:"tokens"`
+	HealthCheck HealthCheckConfig `json:"healthCheck"`
+}
+
+// 缓存config, 5秒刷新一次
+var configCache *AppConfig
+var configMutex sync.RWMutex
+var lastLoadTime int64
 
 // 读取 config.json 文件
 func LoadConfig() (*AppConfig, error) {
+	configMutex.RLock()
+	if configCache != nil && (time.Now().Unix()-lastLoadTime) < 5 {
+		defer configMutex.RUnlock()
+		return configCache, nil
+	}
+	configMutex.RUnlock()
+
+	// 升级为写锁
+	configMutex.Lock()
+	defer configMutex.Unlock()
+
+	// 双重检查，避免其他 goroutine 已经更新了配置
+	if configCache != nil && (time.Now().Unix()-lastLoadTime) < 5 {
+		return configCache, nil
+	}
+
 	if _, err := os.Stat("config.json"); os.IsNotExist(err) {
 		// 文件不存在，写入示例文件
 		err := WriteConfig()
@@ -47,6 +76,29 @@ func LoadConfig() (*AppConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	if config.Interval == 0 {
+		config.Interval = 30 // 默认 30 秒
+	}
+	if config.HealthCheck.Interval == 0 {
+		config.HealthCheck.Interval = 10 // 默认 10 秒
+	}
+	if config.HealthCheck.WarnCount == 0 {
+		config.HealthCheck.WarnCount = 3 // 默认 3 次
+	}
+
+	// 设置Token默认值
+	for i := range config.Tokens {
+		if config.Tokens[i].ChainId == "" {
+			config.Tokens[i].ChainId = "56" // 默认BSC链
+		}
+		if config.Tokens[i].Min <= 0 {
+			config.Tokens[i].Min = 0.1 // 默认最小值
+		}
+	}
+
+	configCache = &config
+	lastLoadTime = time.Now().Unix()
+
 	return &config, nil
 }
 

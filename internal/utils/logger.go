@@ -111,6 +111,13 @@ var (
 // InitLogger 初始化全局 logger, 只执行一次
 func InitLogger(level slog.Leveler, name string, logDir string, when string, interval int) error {
 	loggerOnce.Do(func() {
+		if level == nil {
+			if GetArgs().Debug {
+				level = slog.LevelDebug
+			} else {
+				level = slog.LevelInfo
+			}
+		}
 		logger, err := NewEnhancedLogger(level, name, logDir, when, interval)
 		if err != nil {
 			initErr = err
