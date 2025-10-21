@@ -4,6 +4,7 @@ import (
 	"balance-bot/internal/config"
 	"balance-bot/internal/core"
 	"balance-bot/internal/utils"
+	"balance-bot/pkg"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,7 +19,7 @@ var (
 
 func main() {
 	fmt.Printf("version: %s, build time: %s\n", version, date)
-	utils.GetLogger("")
+	pkg.InitLoggerDefault(utils.GetArgs().Debug)
 	appConfig, err := config.LoadConfig()
 	if err != nil {
 		panic(err)

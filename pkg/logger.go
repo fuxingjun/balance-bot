@@ -1,4 +1,4 @@
-package utils
+package pkg
 
 import (
 	"fmt"
@@ -112,11 +112,7 @@ var (
 func InitLogger(level slog.Leveler, name string, logDir string, when string, interval int) error {
 	loggerOnce.Do(func() {
 		if level == nil {
-			if GetArgs().Debug {
-				level = slog.LevelDebug
-			} else {
-				level = slog.LevelInfo
-			}
+			level = slog.LevelInfo
 		}
 		logger, err := NewEnhancedLogger(level, name, logDir, when, interval)
 		if err != nil {
@@ -128,15 +124,21 @@ func InitLogger(level slog.Leveler, name string, logDir string, when string, int
 	return initErr
 }
 
-// GetLogger 返回全局 logger 实例
-func GetLogger(logDir string) *slog.Logger {
-	if defaultLogger == nil {
-		if logDir == "" {
-			logDir = "logs"
-		}
+func InitLoggerDefault(debug bool) {
+	var level slog.Leveler
+	if debug {
+		level = slog.LevelDebug
+	} else {
+		level = slog.LevelInfo
+	}
+	InitLogger(level, "", "../logs", "midnight", 1)
+}
 
+// GetLogger 返回全局 logger 实例
+func GetLogger() *slog.Logger {
+	if defaultLogger == nil {
 		// 检查 InitLogger 是否返回错误
-		if err := InitLogger(nil, "", logDir, "midnight", 1); err != nil {
+		if err := InitLogger(nil, "", "../logs", "midnight", 1); err != nil {
 			panic(fmt.Sprintf("failed to initialize logger: %v", err))
 		}
 	}

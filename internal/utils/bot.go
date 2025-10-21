@@ -2,6 +2,7 @@ package utils
 
 import (
 	"balance-bot/internal/config"
+	"balance-bot/pkg"
 	"fmt"
 )
 
@@ -12,7 +13,7 @@ func SendWecomMessage(msg string, hook string) error {
 			"content": msg,
 		},
 	}
-	_, err := GetHTTPClient().SendPostRequest(hook, payload, nil, nil)
+	_, err := pkg.GetHTTPClient().SendPostRequest(hook, payload, nil, nil)
 	return err
 }
 
@@ -23,7 +24,7 @@ func SendLarkMessage(msg, hook string) error {
 			"text": msg,
 		},
 	}
-	_, err := GetHTTPClient().SendPostRequest(hook, payload, nil, nil)
+	_, err := pkg.GetHTTPClient().SendPostRequest(hook, payload, nil, nil)
 	return err
 }
 
@@ -34,7 +35,7 @@ func SendTelegramMessage(msg, chatId, token string) error {
 		"text":       msg,
 		"parse_mode": "HTML",
 	}
-	_, err := GetHTTPClient().SendPostRequest(url, payload, nil, nil)
+	_, err := pkg.GetHTTPClient().SendPostRequest(url, payload, nil, nil)
 	return err
 }
 

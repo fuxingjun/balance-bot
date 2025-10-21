@@ -1,7 +1,7 @@
 package core
 
 import (
-	"balance-bot/internal/utils"
+	"balance-bot/pkg"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -42,7 +42,7 @@ func GetEVMBalance(walletAddress, chainId string) (float64, error) {
 		"jsonrpc": "2.0",
 		"method":  "eth_getBalance",
 		"params":  []any{walletAddress, "latest"},
-		"id":      utils.GetSimpleId(),
+		"id":      pkg.GetSimpleId(),
 	}
 
 	return sendBalanceRequest(params, 18, chainId)
@@ -59,7 +59,7 @@ type RPCResponseT[T any] struct {
 }
 
 func sendBalanceRequest(params map[string]any, decimals uint64, chainId string) (float64, error) {
-	resp, err := utils.GetHTTPClient().SendPostRequest(GetRPC(chainId), params, nil, nil)
+	resp, err := pkg.GetHTTPClient().SendPostRequest(GetRPC(chainId), params, nil, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -78,7 +78,7 @@ func sendBalanceRequest(params map[string]any, decimals uint64, chainId string) 
 	if data.Result == nil {
 		return 0, fmt.Errorf("balance not found")
 	}
-	balance, err := utils.ConvertBigIntToAmount(utils.HexToBigInt(*data.Result), decimals)
+	balance, err := pkg.ConvertBigIntToAmount(pkg.HexToBigInt(*data.Result), decimals)
 	if err == nil {
 		return balance, nil
 	}

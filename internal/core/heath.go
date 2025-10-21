@@ -3,6 +3,7 @@ package core
 import (
 	"balance-bot/internal/config"
 	"balance-bot/internal/utils"
+	"balance-bot/pkg"
 	"encoding/json"
 	"fmt"
 	"sync"
@@ -31,7 +32,7 @@ var (
 func HealthCheck(c *fiber.Ctx) error {
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		utils.GetLogger("").Error("Failed to load config", "error", err)
+		pkg.GetLogger().Error("Failed to load config", "error", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "failed to load config",
 		})
@@ -47,7 +48,7 @@ func HealthCheck(c *fiber.Ctx) error {
 			"error": "invalid payload",
 		})
 	}
-	utils.GetLogger("").Debug("Health check received", "name", payload.Name, "extra", string(payload.Extra))
+	pkg.GetLogger().Debug("Health check received", "name", payload.Name, "extra", string(payload.Extra))
 	if payload.Name == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "name is required",
@@ -111,10 +112,10 @@ func handleHealthCheckTimeout(name string, status *HealthStatus, cfg *config.App
 		storeMutex.RUnlock()
 		msg := fmt.Sprintf("⚠️ Health check timeout for %s, last heartbeat at %s", name, formatTime(lastBeat))
 
-		utils.GetLogger("").Warn(msg)
+		pkg.GetLogger().Warn(msg)
 
 		if err := utils.SendMessage(msg); err != nil {
-			utils.GetLogger("").Error("Failed to send alert", "error", err, "service", name, "attempt", i+1)
+			pkg.GetLogger().Error("Failed to send alert", "error", err, "service", name, "attempt", i+1)
 		}
 
 		time.Sleep(time.Duration(cfg.HealthCheck.Interval) * time.Second)
