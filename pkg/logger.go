@@ -124,6 +124,17 @@ func InitLogger(level slog.Leveler, name string, logDir string, when string, int
 	return initErr
 }
 
+// 使用当前工作目录生成 logs 目录，失败时回退到可执行文件目录
+func CwdLogsDir() string {
+	if dir, err := os.Getwd(); err == nil {
+		return filepath.Join(dir, "logs")
+	}
+	if exe, err := os.Executable(); err == nil {
+		return filepath.Join(filepath.Dir(exe), "logs")
+	}
+	return "logs"
+}
+
 func InitLoggerDefault(debug bool) {
 	var level slog.Leveler
 	if debug {
@@ -131,7 +142,7 @@ func InitLoggerDefault(debug bool) {
 	} else {
 		level = slog.LevelInfo
 	}
-	InitLogger(level, "", "../logs", "midnight", 1)
+	InitLogger(level, "", CwdLogsDir(), "midnight", 1)
 }
 
 // GetLogger 返回全局 logger 实例
