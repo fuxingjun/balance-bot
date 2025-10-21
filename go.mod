@@ -1,4 +1,4 @@
-module balance-bot
+module github.com/fuxingjun/balance-bot
 
 go 1.24.0
 

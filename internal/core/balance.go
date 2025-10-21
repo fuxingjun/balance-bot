@@ -1,11 +1,12 @@
 package core
 
 import (
-	"balance-bot/internal/config"
-	"balance-bot/internal/utils"
-	"balance-bot/pkg"
 	"fmt"
 	"time"
+
+	"github.com/fuxingjun/balance-bot/internal/config"
+	"github.com/fuxingjun/balance-bot/internal/utils"
+	"github.com/fuxingjun/balance-bot/pkg"
 )
 
 func checkBalanceItem(item *config.TokenConfig) error {

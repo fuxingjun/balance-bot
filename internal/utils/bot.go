@@ -1,9 +1,10 @@
 package utils
 
 import (
-	"balance-bot/internal/config"
-	"balance-bot/pkg"
 	"fmt"
+
+	"github.com/fuxingjun/balance-bot/internal/config"
+	"github.com/fuxingjun/balance-bot/pkg"
 )
 
 func SendWecomMessage(msg string, hook string) error {

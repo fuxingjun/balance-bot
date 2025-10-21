@@ -1,13 +1,14 @@
 package core
 
 import (
-	"balance-bot/internal/config"
-	"balance-bot/internal/utils"
-	"balance-bot/pkg"
 	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/fuxingjun/balance-bot/internal/config"
+	"github.com/fuxingjun/balance-bot/internal/utils"
+	"github.com/fuxingjun/balance-bot/pkg"
 
 	"github.com/gofiber/fiber/v2"
 )

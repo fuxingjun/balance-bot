@@ -1,11 +1,12 @@
 package core
 
 import (
-	"balance-bot/pkg"
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"sync"
+
+	"github.com/fuxingjun/balance-bot/pkg"
 )
 
 var BSC_RPC = []string{

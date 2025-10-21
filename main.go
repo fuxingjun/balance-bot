@@ -1,11 +1,12 @@
 package main
 
 import (
-	"balance-bot/internal/config"
-	"balance-bot/internal/core"
-	"balance-bot/internal/utils"
-	"balance-bot/pkg"
 	"fmt"
+
+	"github.com/fuxingjun/balance-bot/internal/config"
+	"github.com/fuxingjun/balance-bot/internal/core"
+	"github.com/fuxingjun/balance-bot/internal/utils"
+	"github.com/fuxingjun/balance-bot/pkg"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
