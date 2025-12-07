@@ -21,7 +21,7 @@ type HealthStatus struct {
 }
 
 type HealthPayload struct {
-	Name  string          `json:"name"`
+	Name  string          `json:"name"` // 服务名称, 可用来区分不同服务
 	Extra json.RawMessage `json:"extra,omitempty"`
 }
 

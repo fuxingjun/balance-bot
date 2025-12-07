@@ -118,3 +118,12 @@ func HexToBigInt(hexStr string) *big.Int {
 	}
 	return value
 }
+
+// 字符串转为浮点数
+func StringToFloat(str string) float64 {
+	f, err := strconv.ParseFloat(str, 64)
+	if err != nil {
+		return 0
+	}
+	return f
+}

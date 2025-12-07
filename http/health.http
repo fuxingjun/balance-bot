@@ -5,3 +5,41 @@ Content-Type: application/json
 {
   "name": "tt1"
 }
+
+### 监控交易对
+POST http://127.0.0.1:12808/monitor
+Content-Type: application/json
+
+[
+  {
+    "id": "xxxxxxxxx",
+    "ts": 1765105282206,
+    "a": {
+      "name": "Gate",
+      "exchange": "Gate",
+      "symbol": "PTB_USDT",
+      "type": "perp"
+    },
+    "b": {
+      "name": "OKX DEX 10", 
+      "exchange": "OKX DEX",
+      "symbol": "BNB Chain/0x8410fea2Dd13c1798977Ff4D55A9e1835f54f216/0x55d398326f99059fF775485246999027B3197955",
+      "type": "spot"
+    }
+  },{
+    "id": "xxxxxxxxx",
+    "ts": 1765105282206,
+    "a": {
+      "name": "Binance",
+      "exchange": "Binance",
+      "symbol": "AIAUSDT",
+      "type": "perp"
+    },
+    "b": {
+      "name": "OKX DEX 10", 
+      "exchange": "OKX DEX",
+      "symbol": "BNB Chain/0x8410fea2Dd13c1798977Ff4D55A9e1835f54f216/0x55d398326f99059fF775485246999027B3197955",
+      "type": "spot"
+    }
+  }
+]

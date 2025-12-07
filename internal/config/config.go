@@ -27,11 +27,17 @@ type HealthCheckConfig struct {
 	WarnCount int `json:"warnCount,omitempty"` // 警告次数 允许为空, 默认 3 次
 }
 
+type VolumeMonitorConfig struct {
+	Platform     string  `json:"platform"`               // 交易所
+	ThresholdUSD float64 `json:"thresholdUSD,omitempty"` // 24h交易量阈值，单位美元，小于该值告警 默认50w
+}
+
 type AppConfig struct {
-	Webhook     WebhookConfig     `json:"webhook"`
-	Interval    int               `json:"interval,omitempty"` // 允许为空, 默认 30s
-	Tokens      []TokenConfig     `json:"tokens"`
-	HealthCheck HealthCheckConfig `json:"healthCheck"`
+	Webhook       WebhookConfig         `json:"webhook"`
+	Interval      int                   `json:"interval,omitempty"` // 允许为空, 默认 30s
+	Tokens        []TokenConfig         `json:"tokens"`
+	HealthCheck   HealthCheckConfig     `json:"healthCheck"`
+	VolumeMonitor []VolumeMonitorConfig `json:"volumeMonitor,omitempty"` // 交易量监控配置
 }
 
 // 缓存config, 5秒刷新一次
@@ -126,6 +132,16 @@ func WriteConfig() error {
       "name": "MyWallet01",
       "min": 0.1,
       "max": 1000
+    }
+  ],
+  "volumeMonitor": [
+    {
+      "platform": "gate",
+      "thresholdUSD": 1000000
+    },
+    {
+      "platform": "binance",
+      "thresholdUSD": 10000000
     }
   ]
 }`

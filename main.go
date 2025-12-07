@@ -38,6 +38,12 @@ func main() {
 
 	// 健康检测信息
 	println("健康检测间隔:", appConfig.HealthCheck.Interval, "告警次数:", appConfig.HealthCheck.WarnCount)
+
+	// 交易量检测配置
+	for _, monitor := range appConfig.VolumeMonitor {
+		println("交易量监控平台:", monitor.Platform, "阈值(美元):", fmt.Sprintf("%.2f", monitor.ThresholdUSD))
+	}
+
 	// 启动一个http服务
 	args := utils.GetArgs()
 	app := fiber.New()
@@ -54,6 +60,7 @@ func main() {
 	}))
 
 	app.Post("/health", core.HealthCheck)
+	app.Post("/monitor", core.PairsMonitor)
 
 	addr := fmt.Sprintf("%s:%d", args.Host, args.Port)
 	// 启动服务器在 指定 端口
