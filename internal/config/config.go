@@ -28,7 +28,7 @@ type HealthCheckConfig struct {
 }
 
 type VolumeMonitorConfig struct {
-	NotifyCount int                     `json:"NotifyCount,omitempty"` // 通知次数, 允许为空, 默认 3 次
+	NotifyCount int                     `json:"notifyCount,omitempty"` // 通知次数, 允许为空, 默认 3 次
 	Platform    []VolumeMonitorPlatform `json:"platform"`              // 交易所列表
 }
 
@@ -139,16 +139,19 @@ func WriteConfig() error {
       "max": 1000
     }
   ],
-  "volumeMonitor": [
-    {
-      "platform": "gate",
-      "thresholdUSD": 1000000
-    },
-    {
-      "platform": "binance",
-      "thresholdUSD": 10000000
-    }
-  ]
+  "volumeMonitor": {
+		"notifyCount": 3,
+		"platform": [
+      {
+        "platform": "gate",
+        "thresholdUSD": 500000
+      },
+      {
+        "platform": "binance",
+        "thresholdUSD": 5000000
+      }
+    ]
+	}
 }`
 	return os.WriteFile("config.json", []byte(configStr), 0644)
 }
