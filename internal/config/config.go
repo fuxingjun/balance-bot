@@ -28,16 +28,21 @@ type HealthCheckConfig struct {
 }
 
 type VolumeMonitorConfig struct {
+	NotifyCount int                     `json:"NotifyCount,omitempty"` // 通知次数, 允许为空, 默认 3 次
+	Platform    []VolumeMonitorPlatform `json:"platform"`              // 交易所列表
+}
+
+type VolumeMonitorPlatform struct {
 	Platform     string  `json:"platform"`               // 交易所
 	ThresholdUSD float64 `json:"thresholdUSD,omitempty"` // 24h交易量阈值，单位美元，小于该值告警 默认50w
 }
 
 type AppConfig struct {
-	Webhook       WebhookConfig         `json:"webhook"`
-	Interval      int                   `json:"interval,omitempty"` // 允许为空, 默认 30s
-	Tokens        []TokenConfig         `json:"tokens"`
-	HealthCheck   HealthCheckConfig     `json:"healthCheck"`
-	VolumeMonitor []VolumeMonitorConfig `json:"volumeMonitor,omitempty"` // 交易量监控配置
+	Webhook       WebhookConfig       `json:"webhook"`
+	Interval      int                 `json:"interval,omitempty"` // 允许为空, 默认 30s
+	Tokens        []TokenConfig       `json:"tokens"`
+	HealthCheck   HealthCheckConfig   `json:"healthCheck"`
+	VolumeMonitor VolumeMonitorConfig `json:"volumeMonitor"` // 交易量监控配置
 }
 
 // 缓存config, 5秒刷新一次

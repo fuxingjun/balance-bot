@@ -40,8 +40,13 @@ func main() {
 	println("健康检测间隔:", appConfig.HealthCheck.Interval, "告警次数:", appConfig.HealthCheck.WarnCount)
 
 	// 交易量检测配置
-	for _, monitor := range appConfig.VolumeMonitor {
-		println("交易量监控平台:", monitor.Platform, "阈值(美元):", fmt.Sprintf("%.2f", monitor.ThresholdUSD))
+	if len(appConfig.VolumeMonitor.Platform) > 0 {
+		println("交易量监控配置:")
+		for _, platform := range appConfig.VolumeMonitor.Platform {
+			println("交易所:", platform.Platform, "24h交易量阈值(美元):", fmt.Sprintf("%.2f", platform.ThresholdUSD))
+		}
+	} else {
+		println("未配置交易量监控。")
 	}
 
 	// 启动一个http服务

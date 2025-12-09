@@ -56,45 +56,64 @@ func PairsMonitor(c *fiber.Ctx) error {
 	})
 }
 
+// 24小时缓存
+var notifyCache = pkg.NewTTLCache(24 * 3600 * 1e9)
+
+// 定义交易所检查函数的类型
+type exchangeChecker func([]string) ([]PerpTicker, error)
+
+// 交易所方法配置映射
+var exchangeCheckers = map[string]exchangeChecker{
+	"gate":    checkGateSymbols,
+	"binance": checkBinanceSymbols,
+}
+
 func checkExchangeSymbol(exchange string, symbols []string) {
 	pkg.GetLogger().Debug("Requesting exchange data", "exchange", exchange, "symbols", symbols)
-	if strings.ToLower(exchange) == "gate" {
-		go func() {
-			tickers, err := checkGateSymbols(symbols)
-			if err != nil {
-				pkg.GetLogger().Debug("Failed to get gate tickers", "error", err)
-				return
-			}
-			if len(tickers) == 0 {
-				pkg.GetLogger().Debug("No matching tickers found on gate")
-				return
-			}
-			msg := "Volume too low on gate:\n"
-			for _, ticker := range tickers {
-				msg += "symbol: " + ticker.symbol + ", 24h volume: " + ticker.volume24h + "\n"
-			}
-			pkg.GetLogger().Info("Sending volume alert", "message", msg)
-			utils.SendMessage(msg)
-		}()
-	} else if strings.ToLower(exchange) == "binance" {
-		go func() {
-			tickers, err := checkBinanceSymbols(symbols)
-			if err != nil {
-				pkg.GetLogger().Debug("Failed to get binance tickers", "error", err)
-				return
-			}
-			if len(tickers) == 0 {
-				pkg.GetLogger().Debug("No matching tickers found on binance")
-				return
-			}
-			msg := "Volume too low on binance:\n"
-			for _, ticker := range tickers {
-				msg += "symbol: " + ticker.symbol + ", 24h volume: " + ticker.volume24h + "\n"
-			}
-			pkg.GetLogger().Info("Sending volume alert", "message", msg)
-			utils.SendMessage(msg)
-		}()
+
+	checker, exists := exchangeCheckers[strings.ToLower(exchange)]
+	if !exists {
+		pkg.GetLogger().Debug("Unsupported exchange", "exchange", exchange)
+		return
 	}
+
+	go func() {
+		tickers, err := checker(symbols)
+		if err != nil {
+			pkg.GetLogger().Debug("Failed to get tickers", "exchange", exchange, "error", err)
+			return
+		}
+		if len(tickers) == 0 {
+			pkg.GetLogger().Debug("No matching tickers found", "exchange", exchange)
+			return
+		}
+
+		var msgParts []string
+		notifyCount := getNotifyCount()
+
+		for _, ticker := range tickers {
+			cacheKey := strings.ToLower(exchange) + "_" + ticker.symbol
+			count := 0
+			if val, exists := notifyCache.Get(cacheKey); exists {
+				count = val.(int)
+			}
+
+			if count >= notifyCount {
+				pkg.GetLogger().Debug("Skipping notification for", "symbol", ticker.symbol, "count", count)
+				continue
+			}
+
+			count++
+			notifyCache.Set(cacheKey, count)
+			msgParts = append(msgParts, "symbol: "+ticker.symbol+", 24h volume: "+ticker.volume24h)
+		}
+
+		if len(msgParts) > 0 {
+			msg := "Volume too low on " + exchange + ":\n" + strings.Join(msgParts, "\n")
+			pkg.GetLogger().Info("Sending volume alert", "exchange", exchange, "message", msg)
+			utils.SendMessage(msg)
+		}
+	}()
 }
 
 type PerpTicker struct {
@@ -102,13 +121,21 @@ type PerpTicker struct {
 	volume24h string
 }
 
+func getNotifyCount() int {
+	cfg, err := config.LoadConfig()
+	if err != nil || cfg == nil {
+		return 3
+	}
+	return cfg.VolumeMonitor.NotifyCount
+}
+
 // 寻找交易所的监控配置
-func findVolumeMonitorConfig(exchange string) *config.VolumeMonitorConfig {
+func findVolumeMonitorConfig(exchange string) *config.VolumeMonitorPlatform {
 	cfg, err := config.LoadConfig()
 	if err != nil || cfg == nil {
 		return nil
 	}
-	for _, monitor := range cfg.VolumeMonitor {
+	for _, monitor := range cfg.VolumeMonitor.Platform {
 		if strings.EqualFold(monitor.Platform, exchange) {
 			return &monitor
 		}
