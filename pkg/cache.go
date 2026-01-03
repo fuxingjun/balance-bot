@@ -125,3 +125,16 @@ func (c *SimpleCache) Len() int {
 	defer c.mu.RUnlock()
 	return len(c.items)
 }
+
+// GetAllKeys 返回所有键的切片
+func (c *SimpleCache) GetAllKeys() map[string][]string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	result := make(map[string][]string)
+	for k, v := range c.items {
+		if symList, ok := v.([]string); ok {
+			result[k] = symList
+		}
+	}
+	return result
+}

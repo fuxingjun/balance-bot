@@ -36,6 +36,9 @@ func main() {
 	}
 	core.CheckBalance()
 
+	// 启动后台指数监控任务
+	go core.StartIndexMonitor()
+
 	// 健康检测信息
 	println("健康检测间隔:", appConfig.HealthCheck.Interval, "告警次数:", appConfig.HealthCheck.WarnCount)
 
