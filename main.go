@@ -37,7 +37,12 @@ func main() {
 	core.CheckBalance()
 
 	// 启动后台指数监控任务
-	go core.StartIndexMonitor()
+	if appConfig.IndexComponentMonitor {
+		go core.StartIndexMonitor()
+		println("合约指数成份监控已启用。")
+	} else {
+		println("合约指数成份监控未启用。")
+	}
 
 	// 健康检测信息
 	println("健康检测间隔:", appConfig.HealthCheck.Interval, "告警次数:", appConfig.HealthCheck.WarnCount)

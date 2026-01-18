@@ -38,11 +38,12 @@ type VolumeMonitorPlatform struct {
 }
 
 type AppConfig struct {
-	Webhook       WebhookConfig       `json:"webhook"`
-	Interval      int                 `json:"interval,omitempty"` // 允许为空, 默认 30s
-	Tokens        []TokenConfig       `json:"tokens"`
-	HealthCheck   HealthCheckConfig   `json:"healthCheck"`
-	VolumeMonitor VolumeMonitorConfig `json:"volumeMonitor"` // 交易量监控配置
+	Webhook               WebhookConfig       `json:"webhook"`
+	Interval              int                 `json:"interval,omitempty"` // 允许为空, 默认 30s
+	Tokens                []TokenConfig       `json:"tokens"`
+	HealthCheck           HealthCheckConfig   `json:"healthCheck"`
+	VolumeMonitor         VolumeMonitorConfig `json:"volumeMonitor"`                   // 交易量监控配置
+	IndexComponentMonitor bool                `json:"indexComponentMonitor,omitempty"` // 是否启用合约指数成份监控
 }
 
 // 缓存config, 5秒刷新一次
@@ -151,7 +152,8 @@ func WriteConfig() error {
         "thresholdUSD": 5000000
       }
     ]
-	}
+	},
+	"indexComponentMonitor": true,
 }`
 	return os.WriteFile("config.json", []byte(configStr), 0644)
 }
